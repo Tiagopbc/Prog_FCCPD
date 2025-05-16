@@ -39,7 +39,7 @@ def list_turmas():
     """)
     print("\n-- Lista de Turmas --")
     for t in turmas:
-        print(f"ID: {t[0]}, Semestre: {t[1]}, Ano: {t[2]}, Disciplina: {t[3]}, Professor: {t[4]}")
+        print(f"ID: {t['id_turma']}, Semestre: {t['semestre']}, Ano: {t['ano']}, Disciplina: {t['disciplina']}, Professor: {t['professor']}")
 
 def update_turma():
     id_turma = input("ID da Turma a atualizar: ")

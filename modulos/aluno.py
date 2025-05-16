@@ -1,4 +1,5 @@
 from db import execute_query, fetch_all
+from tabulate import tabulate
 
 def create_aluno():
     nome = input("Nome: ")
@@ -10,9 +11,13 @@ def create_aluno():
     )
 
 def list_alunos():
-    alunos = fetch_all("SELECT * FROM Aluno")
-    for a in alunos:
-        print(a)
+    raw = fetch_all("SELECT * FROM aluno ORDER BY id_aluno")
+    alunos = [dict(row) for row in raw]  # Garantir conversão
+    if alunos:
+        print(tabulate(alunos, headers="keys", tablefmt="grid"))
+    else:
+        print("Nenhum aluno encontrado.")
+
 
 def update_aluno():
     id_aluno = input("ID do Aluno: ")
