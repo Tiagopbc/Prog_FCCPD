@@ -1,49 +1,102 @@
 from db import execute_query, fetch_all
-from tabulate import tabulate
+from datetime import datetime
 
-def create_aluno():
+def cadastrar_aluno():
     nome = input("Nome: ")
-    curso = input("Curso: ")
-    matricula = input("Matrícula: ")
-    execute_query(
-        "INSERT INTO Aluno (nome, curso, matricula) VALUES (%s, %s, %s)",
-        (nome, curso, matricula)
-    )
 
-def list_alunos():
-    raw = fetch_all("SELECT * FROM aluno ORDER BY id_aluno")
-    alunos = [dict(row) for row in raw]  # Garantir conversão
-    if alunos:
-        print(tabulate(alunos, headers="keys", tablefmt="grid"))
+    cursos = ['Direito', 'História', 'Medicina', 'Matemática', 'Computação']
+    print("\nCursos disponíveis:")
+    for i, curso in enumerate(cursos, start=1):
+        print(f"{i}. {curso}")
+
+    escolha = int(input("Escolha o número do curso: "))
+    if escolha < 1 or escolha > len(cursos):
+        print("Curso inválido.")
+        return
+
+    curso = cursos[escolha - 1]
+
+    # Gerar matrícula automática baseada na última inserida
+    ano_atual = datetime.now().year
+    prefixo = f"{ano_atual}%"
+    sql = "SELECT matricula FROM Aluno WHERE matricula LIKE %s ORDER BY matricula DESC LIMIT 1"
+    resultado = fetch_all(sql, (prefixo,))
+
+    if resultado:
+        ultima_matricula = int(resultado[0]['matricula'])
+        proxima_matricula = ultima_matricula + 1
     else:
+        proxima_matricula = int(f"{ano_atual}001")
+
+    matricula = str(proxima_matricula)
+
+    sql = "INSERT INTO Aluno (nome, curso, matricula) VALUES (%s, %s, %s)"
+    execute_query(sql, (nome, curso, matricula))
+
+    print(f"Aluno cadastrado com sucesso. Matrícula: {matricula}")
+
+def listar_alunos():
+    sql = "SELECT * FROM Aluno ORDER BY id_aluno"
+    alunos = fetch_all(sql)
+
+    if not alunos:
         print("Nenhum aluno encontrado.")
+        return
 
+    print("\n📋 Lista de Alunos\n")
+    print(f"{'ID':<5} {'Nome':<20} {'Curso':<15} {'Matrícula'}")
+    print("-" * 60)
 
-def update_aluno():
-    id_aluno = input("ID do Aluno: ")
+    for aluno in alunos:
+        print(f"{aluno['id_aluno']:<5} {aluno['nome']:<20} {aluno['curso']:<15} {aluno['matricula']}")
+
+def atualizar_aluno():
+    id_aluno = int(input("ID do Aluno: "))
     nome = input("Novo nome: ")
-    curso = input("Novo curso: ")
-    execute_query(
-        "UPDATE Aluno SET nome = %s, curso = %s WHERE id_aluno = %s",
-        (nome, curso, id_aluno)
-    )
 
-def delete_aluno():
-    id_aluno = input("ID do Aluno: ")
+    cursos = ['Direito', 'História', 'Medicina', 'Matemática', 'Computação']
+    print("\nCursos disponíveis:")
+    for i, curso in enumerate(cursos, start=1):
+        print(f"{i}. {curso}")
+
+    escolha = int(input("Escolha o número do curso: "))
+    if escolha < 1 or escolha > len(cursos):
+        print("Curso inválido.")
+        return
+
+    curso = cursos[escolha - 1]
+
+    sql = "UPDATE Aluno SET nome = %s, curso = %s WHERE id_aluno = %s"
+    execute_query(sql, (nome, curso, id_aluno))
+    print("Aluno atualizado com sucesso.")
+
+def remover_aluno():
+    id_aluno = int(input("ID do Aluno: "))
+
+    # Remover inscrições antes de remover o aluno
+    execute_query("DELETE FROM Inscricao WHERE id_aluno = %s", (id_aluno,))
     execute_query("DELETE FROM Aluno WHERE id_aluno = %s", (id_aluno,))
+    print("Aluno removido com sucesso.")
 
 def menu():
-    print("\n-- Menu Alunos --")
-    print("1. Cadastrar")
-    print("2. Listar")
-    print("3. Atualizar")
-    print("4. Remover")
-    opcao = input("Escolha: ")
-    if opcao == '1':
-        create_aluno()
-    elif opcao == '2':
-        list_alunos()
-    elif opcao == '3':
-        update_aluno()
-    elif opcao == '4':
-        delete_aluno()
+    while True:
+        print("\n-- Menu Alunos --")
+        print("1. Cadastrar")
+        print("2. Listar")
+        print("3. Atualizar")
+        print("4. Remover")
+        print("0. Voltar")
+        escolha = input("Escolha: ")
+
+        if escolha == "1":
+            cadastrar_aluno()
+        elif escolha == "2":
+            listar_alunos()
+        elif escolha == "3":
+            atualizar_aluno()
+        elif escolha == "4":
+            remover_aluno()
+        elif escolha == "0":
+            break
+        else:
+            print("Opção inválida.")

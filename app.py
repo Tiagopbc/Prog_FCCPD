@@ -1,4 +1,4 @@
-from modulos import aluno, turma, inscricao
+from modulos import aluno, turma, inscricao, relatorio
 
 def main():
     while True:
@@ -8,18 +8,19 @@ def main():
         print("3. Gerenciar Inscrições")
         print("4. Relatórios")
         print("5. Sair")
+
         opcao = input("Escolha uma opção: ")
 
-        if opcao == '1':
+        if opcao == "1":
             aluno.menu()
-        elif opcao == '2':
+        elif opcao == "2":
             turma.menu()
-        elif opcao == '3':
+        elif opcao == "3":
             inscricao.menu()
-        elif opcao == '4':
-            inscricao.gerar_relatorios()
-        elif opcao == '5':
-            print("Encerrando.")
+        elif opcao == "4":
+            relatorio.menu()
+        elif opcao == "5":
+            print("Encerrando o sistema.")
             break
         else:
             print("Opção inválida.")
